@@ -1,0 +1,39 @@
+name: WinGet Update
+
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # Don't stop if one app fails
+      matrix:
+        include:
+          - identifier: Blur009.BlurAutoClicker
+            repo: Blur009/Blur-AutoClicker
+            url: "https://github.com/Blur009/Blur-AutoClicker/releases/download/v{VERSION}/BlurAutoClicker_{VERSION}_x64-setup.exe"
+          
+          - identifier: martinrotter.RSSGuard5
+            repo: martinrotter/rssguard
+            url: "https://github.com/martinrotter/rssguard/releases/download/{VERSION}/rssguard-{VERSION}-web-qt6-win10.exe"
+          
+          - identifier: QGIS.QField
+            repo: opengisch/QField
+            url: "https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-x64.exe"
+          
+          - identifier: autobrr.mkbrr
+            repo: autobrr/mkbrr
+            url: "https://github.com/autobrr/mkbrr/releases/download/v{VERSION}/mkbrr_{VERSION}_windows_x86_64.zip"
+
+    steps:
+      - name: Update Package
+        uses: michidk/winget-updater@v1
+        with:
+          komac-token: ${{ secrets.KOMAC_TOKEN }}
+          identifier: ${{ matrix.identifier }}
+          repo: ${{ matrix.repo }}
+          url: ${{ matrix.url }}
