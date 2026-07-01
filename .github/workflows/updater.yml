@@ -29,6 +29,14 @@ jobs:
             repo: autobrr/mkbrr
             url: "https://github.com/autobrr/mkbrr/releases/download/v{VERSION}/mkbrr_{VERSION}_windows_x86_64.zip"
 
+          - identifier: qarmin.krokiet
+            repo: qarmin/czkawka
+            url: "https://github.com/qarmin/czkawka/releases/download/{VERSION}/windows_krokiet_on_windows_skia_opengl.exe"
+
+          - identifier: qarmin.krokiet.vulkan
+            repo: qarmin/czkawka
+            url: "https://github.com/qarmin/czkawka/releases/download/{VERSION}/windows_krokiet_on_windows_skia_vulkan.exe"
+          
     steps:
       - name: Update Package
         uses: michidk/winget-updater@v1
