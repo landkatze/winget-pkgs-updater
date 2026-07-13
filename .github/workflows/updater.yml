@@ -40,6 +40,11 @@ jobs:
           - identifier: alecdotdev.Markpad
             repo: alecdotdev/Markpad
             url: "https://github.com/alecdotdev/Markpad/releases/download/v{VERSION}/Markpad_{VERSION}_x64-setup.exe"
+
+          - identifier: MarcoGomiero.FeedFlow
+            repo: prof18/feed-flow
+            url: "https://github.com/prof18/feed-flow/releases/download/{VERSION}-all/FeedFlow-{VERSION}.msi"
+            url: "https://github.com/prof18/feed-flow/releases/download/{VERSION}-desktop/FeedFlow-{VERSION}.msi"
           
     steps:
       - name: Update Package
