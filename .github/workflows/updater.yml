@@ -36,6 +36,10 @@ jobs:
           - identifier: qarmin.krokiet.vulkan
             repo: qarmin/czkawka
             url: "https://github.com/qarmin/czkawka/releases/download/{VERSION}/windows_krokiet_on_windows_skia_vulkan.exe"
+
+          - identifier: alecdotdev.Markpad
+            repo: alecdotdev/Markpad
+            url: "https://github.com/alecdotdev/Markpad/releases/download/v{VERSION}/Markpad_{VERSION}_x64-setup.exe"
           
     steps:
       - name: Update Package
