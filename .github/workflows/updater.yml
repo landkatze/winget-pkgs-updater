@@ -43,7 +43,11 @@ jobs:
 
           - identifier: MarcoGomiero.FeedFlow
             repo: prof18/feed-flow
-            url: '"https://github.com/prof18/feed-flow/releases/download/{VERSION}-all/FeedFlow-{VERSION}.msi" "https://github.com/prof18/feed-flow/releases/download/{VERSION}-desktop/FeedFlow-{VERSION}.msi"'
+            url: "https://github.com/prof18/feed-flow/releases/download/{VERSION}-all/FeedFlow-{VERSION}.msi"
+            
+          - identifier: MarcoGomiero.FeedFlow
+            repo: prof18/feed-flow
+            url: "https://github.com/prof18/feed-flow/releases/download/{VERSION}-desktop/FeedFlow-{VERSION}.msi"'
           
     steps:
       - name: Update Package
