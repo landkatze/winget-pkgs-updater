@@ -8,7 +8,7 @@
 - qarmin.krokiet (https://github.com/qarmin/czkawka)
 - qarmin.krokiet.vulkan (https://github.com/qarmin/czkawka)
 - alecdotdev.Markpad (https://github.com/alecdotdev/Markpad)
-- autobrr.upbrr.gui (https://github.com/autobrr/upbrr)
+- autobrr.upbrr.gui & autobrr.upbrr.cli (https://github.com/autobrr/upbrr)
 
 ## tools
 - Komac (https://github.com/russellbanks/Komac)
