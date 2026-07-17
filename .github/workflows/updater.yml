@@ -44,7 +44,11 @@ jobs:
           - identifier: autobrr.upbrr.gui
             repo: autobrr/upbrr
             url: "https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-gui-v{VERSION}-windows-x64.zip"
-          
+
+          - identifier: autobrr.upbrr.cli
+            repo: autobrr/upbrr
+            url: "https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-cli-v{VERSION}-windows-amd64.zip"
+            
     steps:
       - name: Update Package
         uses: michidk/winget-updater@v1
