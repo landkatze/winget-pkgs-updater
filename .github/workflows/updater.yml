@@ -21,9 +21,9 @@ jobs:
             repo: martinrotter/rssguard
             url: "https://github.com/martinrotter/rssguard/releases/download/{VERSION}/rssguard-{VERSION}-web-qt6-win10.exe"
           
-          # - identifier: QGIS.QField
-          #   repo: opengisch/QField
-          #   url: "https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-x64.exe"
+          - identifier: QGIS.QField
+            repo: opengisch/QField
+            url: "https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-x64.exe"
           
           - identifier: autobrr.mkbrr
             repo: autobrr/mkbrr
