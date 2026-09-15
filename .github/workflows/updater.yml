@@ -48,6 +48,10 @@ jobs:
           - identifier: autobrr.upbrr.cli
             repo: autobrr/upbrr
             url: "https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-cli-v{VERSION}-windows-amd64.zip"
+
+          - identifier: MartinDvorak.MindForger
+            repo: dvorka/mindforger
+            url: "https://github.com/dvorka/mindforger/releases/download/{VERSION}/windows-installer-mindforger-{VERSION}.exe"
             
     steps:
       - name: Update Package
