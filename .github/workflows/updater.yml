@@ -23,8 +23,8 @@ jobs:
           
           - identifier: QGIS.QField
             repo: opengisch/QField
-            url: "https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-x64.exe"
-          
+            url: "https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-x64.msi"
+            
           - identifier: autobrr.mkbrr
             repo: autobrr/mkbrr
             url: "https://github.com/autobrr/mkbrr/releases/download/v{VERSION}/mkbrr_{VERSION}_windows_x86_64.zip"
