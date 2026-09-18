@@ -53,7 +53,7 @@ jobs:
             repo: dvorka/mindforger
             url: "https://github.com/dvorka/mindforger/releases/download/{VERSION}/windows-installer-mindforger-{VERSION}.exe"
 
-            identifier: DonutWare.Fladder
+          - identifier: DonutWare.Fladder
             repo: DonutWare/Fladder
             url: "https://github.com/DonutWare/Fladder/releases/download/v{VERSION}/Fladder-Windows-{VERSION}-Setup.exe"
             
