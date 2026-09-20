@@ -8,6 +8,7 @@
 - DonutWare.Fladder (https://github.com/DonutWare/Fladder)
 - MartinDvorak.MindForger (https://github.com/dvorka/mindforger)
 - martinrotter.RSSGuard5 (https://github.com/martinrotter/rssguard)
+- oldj.switchhosts (https://github.com/oldj/SwitchHosts)
 - qarmin.krokiet (https://github.com/qarmin/czkawka)
 - qarmin.krokiet.vulkan (https://github.com/qarmin/czkawka) 
 - QGIS.QField (https://github.com/opengisch/QField)
