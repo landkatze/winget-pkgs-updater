@@ -57,7 +57,7 @@ jobs:
             repo: DonutWare/Fladder
             url: "https://github.com/DonutWare/Fladder/releases/download/v{VERSION}/Fladder-Windows-{VERSION}-Setup.exe"
 
-          - identifier oldj.switchhosts
+          - identifier: oldj.switchhosts
             repo: oldj/SwitchHosts
             url: "https://github.com/oldj/SwitchHosts/releases/download/v{VERSION}/SwitchHosts-{VERSION}-windows-x64-setup.exe"
             
