@@ -1,0 +1,47 @@
+name: Keepalive
+
+on:
+  schedule:
+    - cron: '23 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check KOMAC_TOKEN
+        env:
+          GH_TOKEN: ${{ secrets.KOMAC_TOKEN }}
+        run: |
+          set -euo pipefail
+          login=$(gh api user --jq '.login')
+          echo "KOMAC_TOKEN is valid, authenticated as ${login}"
+          gh api repos/microsoft/winget-pkgs --jq '.full_name + " is reachable"'
+          echo "::notice::If this step fails, create a new classic token with the public_repo scope and update the KOMAC_TOKEN repository secret."
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ secrets.KOMAC_TOKEN }}
+
+      - name: Refresh keepalive file
+        run: |
+          set -euo pipefail
+          date -u +'%Y-%m-%dT%H:%M:%SZ' > .github/keepalive.txt
+          git add .github/keepalive.txt
+          if git diff --cached --quiet; then
+            echo "keepalive file already up to date"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: keepalive'
+          git push
