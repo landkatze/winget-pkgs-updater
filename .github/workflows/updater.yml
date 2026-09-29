@@ -13,6 +13,10 @@ on:
         description: 'Ignore the "pull request already open for this version" guard'
         type: boolean
         default: false
+      version:
+        description: 'Submit this version instead of the upstream latest (must be newer than the newest published version)'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -126,6 +130,8 @@ jobs:
           URLS: ${{ matrix.urls }}
           DRY_RUN_UPDATE: ${{ inputs.dry_run || 'false' }}
           FORCE_UPDATE: ${{ inputs.force || 'false' }}
+          VERSION_INPUT: ${{ inputs.version || '' }}
+          BLOCKED_LABELS: '(-|^)Error|^Needs-|Policy-|Blocking-Issue|No-Recent-Activity|Validation-(Domain|Indirect-URL|Unapproved-URL|Shell-Execute|VCRuntime-Dependency|MSIX-Dependency|Merge-Conflict|Unattended-Failed)|Manifest-Metadata-Consistency'
         run: |
           set -euo pipefail
 
@@ -138,6 +144,21 @@ jobs:
             exit 1
           fi
           version="${tag#v}"
+          # optional dispatch override: submit a specific version instead of upstream's
+          # latest, for a release whose pull request never landed. Not a downgrade tool:
+          # step 3 below refuses anything winget-pkgs already publishes, so a version that
+          # is not newer than the newest published one is skipped there.
+          if [ -n "${VERSION_INPUT}" ]; then
+            case "${VERSION_INPUT}" in
+              *[!0-9.]*)
+                echo "::error::version input '${VERSION_INPUT}' is not a plain dotted version"
+                exit 1
+                ;;
+            esac
+            version="${VERSION_INPUT}"
+            echo "::notice::version override: submitting ${version}, upstream latest is ${tag}"
+            summary "- version override: submitting \`${version}\`, upstream latest is [\`${tag}\`](https://github.com/${REPO}/releases/tag/${tag})"
+          fi
 
           summary "### ${IDENTIFIER}"
           summary "- upstream release: [\`${tag}\`](https://github.com/${REPO}/releases/tag/${tag})"
@@ -174,25 +195,45 @@ jobs:
             if [ "${latest_published}" = "${version}" ]; then
               summary "- **skipped**: \`${version}\` is already published"
             else
-              summary "- **skipped**: published \`${latest_published}\` is newer than upstream \`${version}\`"
+              summary "- **skipped**: published \`${latest_published}\` is newer than \`${version}\`"
             fi
             echo "${IDENTIFIER}: ${latest_published} >= ${version}, nothing to do"
             exit 0
           fi
 
-          # 4. nothing to do while a pull request for this version is already open
-          #    (Komac's own check is disabled below, a duplicate would fail)
+          # 4. nothing to do while a pull request for this version is already open.
+          #    Deliberately per version, not per identifier: a newer upstream release
+          #    gets its own pull request, parallel version PRs are fine.
+          #    "contains", never "startswith": Komac titles are either
+          #    "New version: <Identifier> version <version>" or
+          #    "General maintenance: <Identifier> version <version>".
+          #    Komac's check is disabled (--skip-pr-check), so this guard is the only
+          #    thing keeping a duplicate out; a failed lookup must fail the job like
+          #    step 2 does, never be read as "no pull request open".
           if [ "${FORCE_UPDATE}" != "true" ]; then
             query=$(printf 'repo:microsoft/winget-pkgs is:pr is:open author:@me' | jq -sRr @uri)
-            search=$(gh api "search/issues?q=${query}&per_page=100" 2>/dev/null) || {
-              echo "::warning::could not list open pull requests, continuing"
-              search='{"items":[]}'
-            }
-            existing=$(printf '%s' "${search}" | jq -r --arg t "${IDENTIFIER} version ${version}" \
-                        '[.items[]? | select(.title? | contains($t)) | .number] | first // empty')
+            if ! search=$(gh api "search/issues?q=${query}&per_page=100" 2>&1 | tr -d '\r'); then
+              echo "::error::could not list the open pull requests of ${IDENTIFIER}: ${search}"
+              summary "- **error**: could not list open pull requests, nothing was submitted this run"
+              exit 1
+            fi
+            if ! existing=$(printf '%s' "${search}" \
+                              | jq -r --arg t "${IDENTIFIER} version ${version}" \
+                                  '[.items[]? | select(.title? | contains($t))
+                                    | {number: .number, labels: ([(.labels // [])[].name] | join(", "))}]
+                                   | first // empty'); then
+              echo "::error::could not parse the pull request search result for ${IDENTIFIER}"
+              summary "- **error**: could not parse the pull request search result"
+              exit 1
+            fi
             if [ -n "${existing}" ]; then
-              summary "- **skipped**: pull request [#${existing}](https://github.com/microsoft/winget-pkgs/pull/${existing}) is already open for \`${version}\`"
-              echo "${IDENTIFIER}: pull request #${existing} is already open for ${version}"
+              pr_number=$(printf '%s' "${existing}" | jq -r '.number')
+              pr_labels=$(printf '%s' "${existing}" | jq -r '.labels')
+              summary "- **skipped**: pull request [#${pr_number}](https://github.com/microsoft/winget-pkgs/pull/${pr_number}) is already open for \`${version}\`"
+              if printf '%s' "${pr_labels}" | grep -qE "${BLOCKED_LABELS}"; then
+                summary "- needs a human: winget-pkgs labels it \`${pr_labels}\` - the updater cannot fix that, and the PR is auto-closed about 8 days after \`Needs-Author-Feedback\` unless the flag is cleared"
+              fi
+              echo "${IDENTIFIER}: pull request #${pr_number} is already open for ${version} (labels: ${pr_labels})"
               exit 0
             fi
           fi
