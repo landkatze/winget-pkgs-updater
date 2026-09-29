@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check KOMAC_TOKEN
+      - name: Check KOMAC_TOKEN and report the state of the world
         env:
           GH_TOKEN: ${{ secrets.KOMAC_TOKEN }}
         run: |
@@ -25,12 +25,47 @@ jobs:
           login=$(gh api user --jq '.login')
           echo "KOMAC_TOKEN is valid, authenticated as ${login}"
           gh api repos/microsoft/winget-pkgs --jq '.full_name + " is reachable"'
+          {
+            echo "## ${login}: $(date -u +'%Y-%m-%dT%H:%MZ')"
+            echo
+            expiry=$(gh api -i user 2>/dev/null | grep -i '^github-authentication-token-expiration:' | cut -d' ' -f2- | tr -d '\r' || true)
+            echo "- KOMAC_TOKEN expires: ${expiry:-unknown, non-expiring token or no expiry reported}"
+            echo "- open winget-pkgs pull requests of ${login}:"
+            gh api "search/issues?q=$(printf 'repo:microsoft/winget-pkgs is:pr is:open author:@me' | jq -sRr @uri)&per_page=100" \
+              --jq '.items[]? | "- [#\(.number)](https://github.com/microsoft/winget-pkgs/pull/\(.number)) \(.title) - opened \(.created_at), labels: \([.labels[].name] | join(", "))"' \
+              || echo "  - could not list them this month"
+            echo
+            echo "KOMAC_TOKEN is a classic token with the public_repo scope; re-create it before the expiry above and update the repository secret."
+          } >> "${GITHUB_STEP_SUMMARY}"
           echo "::notice::If this step fails, create a new classic token with the public_repo scope and update the KOMAC_TOKEN repository secret."
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.KOMAC_TOKEN }}
+      - name: Check recorded baseline
+        run: |
+          set -euo pipefail
+          drift=0
+          while IFS=$'\t' read -r path expected; do
+            [ -z "${path}" ] && continue
+            if [ ! -f "${path}" ]; then
+              echo "::error::${path} is recorded in baseline.json but missing from the repository"
+              drift=1
+              continue
+            fi
+            actual=$(sha256sum "${path}" | cut -d' ' -f1)
+            if [ "${actual}" != "${expected}" ]; then
+              echo "::error::${path} changed since the baseline was recorded (expected ${expected:0:16}..., found ${actual:0:16}...)"
+              printf '%s  %s\n' "${actual}" "${path}"
+              drift=1
+            fi
+          done < <(jq -r '.files | to_entries[] | "\(.key)\t\(.value)"' baseline.json)
+          if [ "${drift}" -ne 0 ]; then
+            echo "::error::baseline.json is stale - paste the hashes printed above into baseline.json and update the manual section 2"
+            exit 1
+          fi
+          echo "all recorded files match baseline.json"
 
       - name: Refresh keepalive file
         run: |
