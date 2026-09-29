@@ -1,5 +1,5 @@
 # winget-pkgs-updater
-Scheduled [winget-pkgs](https://github.com/microsoft/winget-pkgs) updater for various packages (based off ttps://github.com/michidk/winget-updater).
+Scheduled [winget-pkgs](https://github.com/microsoft/winget-pkgs) updater for various packages (based off [winget-updater](https://github.com/michidk/winget-updater)).
 - `updater.yml` runs every 6 hours using [Komac](https://github.com/russellbanks/Komac) to open manifest updates as pull requests.
 - `keepalive.yml` runs every month checking the `KOMAC_TOKEN` is still valid and ensures schedules aren't disabled for inactivity.
 - `dependabot.yml` runs every week, bumping the pinned `actions/checkout` commit if a newer release exists.
