@@ -1,0 +1,10 @@
+{
+  "comment": "sha256 baseline of every file this repo owns. keepalive.yml re-hashes them monthly and fails the run if one drifted - regenerate after any intentional edit (manual section 2). .github/keepalive.txt is excluded because the workflow rewrites it every month; baseline.json is excluded because it cannot hash itself.",
+  "generated_at": "2026-09-29T21:26:27Z",
+  "files": {
+    ".github/dependabot.yml": "5fb74cf53581e86f7299b02c521d0b57901d1fc4b709886be28d7caf53afc75b",
+    ".github/workflows/keepalive.yml": "860ca2674332f7d4a5b57b5c8ef14b49a14a151baf3dea28188f532bf6f220a4",
+    ".github/workflows/updater.yml": "f0c9be07d23f0b849bdc5ad2e3abbef61c2d2977152445144334c367a8048123",
+    "README.md": "fcd79783fea94e20e50f5dc028ab1499522cbf734124d157fb0a7e23b3593caf"
+  }
+}
