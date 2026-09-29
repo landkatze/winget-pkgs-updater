@@ -1,71 +1,266 @@
-name: WinGet Update
+name: WinGet Package Updater
 
 on:
-  push:
   schedule:
-    - cron: '0 0 * * *' # Runs every day at midnight
-  workflow_dispatch: # Allows manual triggering
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only print the changes Komac would submit (no pull request)'
+        type: boolean
+        default: false
+      force:
+        description: 'Ignore the "pull request already open for this version" guard'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winget-updater
+  cancel-in-progress: false
 
 jobs:
   update:
+    name: ${{ matrix.identifier }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
-      fail-fast: false # Don't stop if one app fails
+      fail-fast: false # one failing package must not stop the other packages
+      max-parallel: 4
       matrix:
         include:
+          # x64 only
           - identifier: Blur009.BlurAutoClicker
             repo: Blur009/Blur-AutoClicker
-            url: "https://github.com/Blur009/Blur-AutoClicker/releases/download/v{VERSION}/BlurAutoClicker_{VERSION}_x64-setup.exe"
-          
+            urls: |
+              https://github.com/Blur009/Blur-AutoClicker/releases/download/v{VERSION}/BlurAutoClicker_{VERSION}_x64-setup.exe|x64
+
           - identifier: martinrotter.RSSGuard5
             repo: martinrotter/rssguard
-            url: "https://github.com/martinrotter/rssguard/releases/download/{VERSION}/rssguard-{VERSION}-web-qt6-win10.exe"
-          
-          - identifier: QGIS.QField
-            repo: opengisch/QField
-            url: "https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-x64.msi"
-            
+            urls: |
+              https://github.com/martinrotter/rssguard/releases/download/{VERSION}/rssguard-{VERSION}-web-qt6-win10.exe|x64
+
           - identifier: autobrr.mkbrr
             repo: autobrr/mkbrr
-            url: "https://github.com/autobrr/mkbrr/releases/download/v{VERSION}/mkbrr_{VERSION}_windows_x86_64.zip"
+            urls: |
+              https://github.com/autobrr/mkbrr/releases/download/v{VERSION}/mkbrr_{VERSION}_windows_x86_64.zip|x64
 
           - identifier: qarmin.krokiet
             repo: qarmin/czkawka
-            url: "https://github.com/qarmin/czkawka/releases/download/{VERSION}/windows_krokiet_on_windows_skia_opengl.exe"
+            urls: |
+              https://github.com/qarmin/czkawka/releases/download/{VERSION}/windows_krokiet_on_windows_skia_opengl.exe|x64
 
           - identifier: qarmin.krokiet.vulkan
             repo: qarmin/czkawka
-            url: "https://github.com/qarmin/czkawka/releases/download/{VERSION}/windows_krokiet_on_windows_skia_vulkan.exe"
-
-          - identifier: alecdotdev.Markpad
-            repo: alecdotdev/Markpad
-            url: "https://github.com/alecdotdev/Markpad/releases/download/v{VERSION}/Markpad_{VERSION}_x64-setup.exe"
-
-          # - identifier: autobrr.upbrr.gui
-          #   repo: autobrr/upbrr
-          #   url: "https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-gui-v{VERSION}-windows-x64.zip"
-
-          - identifier: autobrr.upbrr.cli
-            repo: autobrr/upbrr
-            url: "https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-cli-v{VERSION}-windows-amd64.zip"
+            urls: |
+              https://github.com/qarmin/czkawka/releases/download/{VERSION}/windows_krokiet_on_windows_skia_vulkan.exe|x64
 
           - identifier: MartinDvorak.MindForger
             repo: dvorka/mindforger
-            url: "https://github.com/dvorka/mindforger/releases/download/{VERSION}/windows-installer-mindforger-{VERSION}.exe"
+            urls: |
+              https://github.com/dvorka/mindforger/releases/download/{VERSION}/windows-installer-mindforger-{VERSION}.exe|x64
 
           - identifier: DonutWare.Fladder
             repo: DonutWare/Fladder
-            url: "https://github.com/DonutWare/Fladder/releases/download/v{VERSION}/Fladder-Windows-{VERSION}-Setup.exe"
+            urls: |
+              https://github.com/DonutWare/Fladder/releases/download/v{VERSION}/Fladder-Windows-{VERSION}-Setup.exe|x64
 
+          #  x64 + arm64
+          - identifier: QGIS.QField
+            repo: opengisch/QField
+            urls: |
+              https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-x64.msi|x64
+              https://github.com/opengisch/QField/releases/download/v{VERSION}/qfield-v{VERSION}-windows-arm64.msi|arm64
+
+          - identifier: alecdotdev.Markpad
+            repo: sftwrdotdev/Markpad
+            urls: |
+              https://github.com/sftwrdotdev/Markpad/releases/download/v{VERSION}/Markpad_{VERSION}_x64-setup.exe|x64
+              https://github.com/sftwrdotdev/Markpad/releases/download/v{VERSION}/Markpad_{VERSION}_arm64-setup.exe|arm64
+
+          - identifier: autobrr.upbrr.cli
+            repo: autobrr/upbrr
+            urls: |
+              https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-cli-v{VERSION}-windows-amd64.zip|x64
+              https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-cli-v{VERSION}-windows-arm64.zip|arm64
+
+          - identifier: autobrr.upbrr.gui
+            repo: autobrr/upbrr
+            urls: |
+              https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-gui-v{VERSION}-windows-x64.zip|x64
+              https://github.com/autobrr/upbrr/releases/download/v{VERSION}/upbrr-gui-v{VERSION}-windows-arm64.zip|arm64
+
+          #  x64 + x86 + arm64
           - identifier: oldj.switchhosts
             repo: oldj/SwitchHosts
-            url: "https://github.com/oldj/SwitchHosts/releases/download/v{VERSION}/SwitchHosts-{VERSION}-windows-x64-setup.exe"
-            
+            urls: |
+              https://github.com/oldj/SwitchHosts/releases/download/v{VERSION}/SwitchHosts-{VERSION}-windows-x64-setup.exe|x64
+              https://github.com/oldj/SwitchHosts/releases/download/v{VERSION}/SwitchHosts-{VERSION}-windows-x86-setup.exe|x86
+              https://github.com/oldj/SwitchHosts/releases/download/v{VERSION}/SwitchHosts-{VERSION}-windows-arm64-setup.exe|arm64
+
     steps:
-      - name: Update Package
-        uses: michidk/winget-updater@v1
-        with:
-          komac-token: ${{ secrets.KOMAC_TOKEN }}
-          identifier: ${{ matrix.identifier }}
-          repo: ${{ matrix.repo }}
-          url: ${{ matrix.url }}
+      - name: Install Komac 2.15.0
+        env:
+          KOMAC_VERSION: 2.15.0
+          KOMAC_SHA256: 87ebcbf897a3edb58a67b97ad75feec1a0e9372d8265322ee102d8a3caea9b7d
+        run: |
+          set -euo pipefail
+          asset="komac-${KOMAC_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -fsSL --retry 3 -o "/tmp/${asset}" \
+            "https://github.com/russellbanks/Komac/releases/download/v${KOMAC_VERSION}/${asset}"
+          echo "${KOMAC_SHA256}  /tmp/${asset}" | sha256sum --check --strict
+          tar -xzf "/tmp/${asset}" -C /tmp
+          sudo install -m 0755 /tmp/komac /usr/local/bin/komac
+          komac --version
+
+      - name: Update ${{ matrix.identifier }}
+        env:
+          GH_TOKEN: ${{ secrets.KOMAC_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.KOMAC_TOKEN }}
+          KOMAC_CREATED_WITH: winget-pkgs-updater
+          KOMAC_CREATED_WITH_URL: https://github.com/landkatze/winget-pkgs-updater
+          IDENTIFIER: ${{ matrix.identifier }}
+          REPO: ${{ matrix.repo }}
+          URLS: ${{ matrix.urls }}
+          DRY_RUN_UPDATE: ${{ inputs.dry_run || 'false' }}
+          FORCE_UPDATE: ${{ inputs.force || 'false' }}
+        run: |
+          set -euo pipefail
+
+          summary() { printf '%s\n' "$*" >> "${GITHUB_STEP_SUMMARY}"; }
+
+          # 1. latest upstream release, the tag without a leading "v" is the version
+          tag=$(gh api "repos/${REPO}/releases/latest" --jq '.tag_name' 2>/dev/null | tr -d '\r' || true)
+          if [ -z "${tag}" ] || [ "${tag}" = "null" ]; then
+            echo "::error::${REPO} has no release marked as latest"
+            exit 1
+          fi
+          version="${tag#v}"
+
+          summary "### ${IDENTIFIER}"
+          summary "- upstream release: [\`${tag}\`](https://github.com/${REPO}/releases/tag/${tag})"
+
+          # 2. manifest directory, derived exactly like Komac does:
+          #    manifests/<first character lowercased>/<identifier with dots as slashes>
+          first_char=$(printf '%s' "${IDENTIFIER}" | cut -c1 | tr '[:upper:]' '[:lower:]')
+          manifest_dir="manifests/${first_char}/$(printf '%s' "${IDENTIFIER}" | tr '.' '/')"
+
+          # A failed lookup must never look like "nothing published yet": that
+          # would skip the "already published" guard below and Komac would be
+          # asked for a duplicate. Fail loudly, the next cron run retries.
+          if ! published=$(gh api "repos/microsoft/winget-pkgs/contents/${manifest_dir}" \
+                             --jq '.[].name' 2>&1 | tr -d '\r'); then
+            if printf '%s' "${published}" | grep -qiE '404|not found'; then
+              echo "::error::${IDENTIFIER} is not in winget-pkgs (${manifest_dir}) - only packages that exist there are updated, new ones need 'komac new'"
+              summary "- **error**: \`${IDENTIFIER}\` is not in winget-pkgs (\`${manifest_dir}\`)"
+            else
+              echo "::error::could not read ${manifest_dir} from winget-pkgs: ${published}"
+              summary "- **error**: could not read \`${manifest_dir}\` from winget-pkgs"
+            fi
+            exit 1
+          fi
+          latest_published=$(printf '%s\n' "${published}" | grep -E '^[0-9]' | sort -V | tail -n1 || true)
+          if [ -z "${latest_published}" ]; then
+            echo "::error::${IDENTIFIER} has no version directory below ${manifest_dir}"
+            summary "- **error**: no version directory below \`${manifest_dir}\`"
+            exit 1
+          fi
+
+          # 3. nothing to do while winget-pkgs is at or ahead of the upstream release
+          if [ -n "${latest_published}" ] &&
+             [ "$(printf '%s\n%s\n' "${latest_published}" "${version}" | sort -V | tail -n1)" = "${latest_published}" ]; then
+            if [ "${latest_published}" = "${version}" ]; then
+              summary "- **skipped**: \`${version}\` is already published"
+            else
+              summary "- **skipped**: published \`${latest_published}\` is newer than upstream \`${version}\`"
+            fi
+            echo "${IDENTIFIER}: ${latest_published} >= ${version}, nothing to do"
+            exit 0
+          fi
+
+          # 4. nothing to do while a pull request for this version is already open
+          #    (Komac's own check is disabled below, a duplicate would fail)
+          if [ "${FORCE_UPDATE}" != "true" ]; then
+            query=$(printf 'repo:microsoft/winget-pkgs is:pr is:open author:@me' | jq -sRr @uri)
+            search=$(gh api "search/issues?q=${query}&per_page=100" 2>/dev/null) || {
+              echo "::warning::could not list open pull requests, continuing"
+              search='{"items":[]}'
+            }
+            existing=$(printf '%s' "${search}" | jq -r --arg t "${IDENTIFIER} version ${version}" \
+                        '[.items[]? | select(.title? | contains($t)) | .number] | first // empty')
+            if [ -n "${existing}" ]; then
+              summary "- **skipped**: pull request [#${existing}](https://github.com/microsoft/winget-pkgs/pull/${existing}) is already open for \`${version}\`"
+              echo "${IDENTIFIER}: pull request #${existing} is already open for ${version}"
+              exit 0
+            fi
+          fi
+
+          # 5. keep the installer URLs that really exist, the first one is required
+          url_args=()
+          available=()
+          missing=()
+          index=0
+          while IFS= read -r entry; do
+            entry="${entry//$'\r'/}"
+            [ -z "${entry}" ] && continue
+            index=$((index + 1))
+
+            case "${entry}" in
+              *"|"*) url="${entry%|*}"; arch="${entry##*|}" ;;
+              *) echo "::error::'${entry}' is missing the '|<arch>' suffix"; exit 1 ;;
+            esac
+            case "${arch}" in
+              x64|x86|arm64) ;;
+              *) echo "::error::unsupported architecture '${arch}' in '${entry}'"; exit 1 ;;
+            esac
+
+            url="${url//\{VERSION\}/${version}}"
+            status=$(curl -s -o /dev/null -w '%{http_code}' -L --head --max-time 60 "${url}" || true)
+            if [ "${status}" != "200" ]; then
+              # some hosts reject HEAD, so fall back to a one byte ranged GET
+              status=$(curl -s -o /dev/null -w '%{http_code}' -L --range 0-0 --max-time 60 "${url}" || true)
+            fi
+
+            if [ "${status}" = "200" ]; then
+              url_args+=("${url}|${arch}")
+              available+=("${arch}")
+            elif [ "${index}" -eq 1 ]; then
+              summary "- **skipped**: no \`${arch}\` installer in \`${tag}\` (HTTP ${status})"
+              summary "- expected asset: ${url}"
+              echo "${IDENTIFIER}: ${url} -> HTTP ${status}"
+              exit 0
+            else
+              missing+=("${arch} (HTTP ${status})")
+            fi
+          done <<< "${URLS}"
+
+          arch_list=$(printf '%s, ' "${available[@]}"); arch_list="${arch_list%, }"
+          if [ "${#missing[@]}" -gt 0 ]; then
+            missing_list=$(printf '%s, ' "${missing[@]}"); missing_list="${missing_list%, }"
+            echo "::warning::${IDENTIFIER} ${version}: no installer for ${missing_list}, updating ${arch_list} only"
+            summary "- **warning**: no installer for ${missing_list}, updating \`${arch_list}\` only"
+          fi
+
+          # 6. informational: architectures of the last published version
+          if [ -n "${latest_published}" ]; then
+            before=$(gh api "repos/microsoft/winget-pkgs/contents/${manifest_dir}/${latest_published}/${IDENTIFIER}.installer.yaml" \
+                       --jq '.content' 2>/dev/null | tr -d '"\n\r' | base64 -d 2>/dev/null \
+                       | awk '/^[[:space:]]*-?[[:space:]]*Architecture:/ {print tolower($NF)}' | sort -u | paste -sd, - || true)
+            now=$(printf '%s\n' "${available[@]}" | sort -u | paste -sd, -)
+            if [ -n "${before}" ] && [ "${before}" != "${now}" ]; then
+              summary "- note: architectures change from \`${before}\` (${latest_published}) to \`${now}\` (${version})"
+            fi
+          fi
+
+          # 7. hand over to Komac
+          if [ "${DRY_RUN_UPDATE}" = "true" ]; then
+            summary "- **dry run**: would submit \`${version}\` (\`${arch_list}\`)"
+            echo "${IDENTIFIER}: dry run for ${version} (${arch_list})"
+            komac update "${IDENTIFIER}" --version "${version}" --urls "${url_args[@]}" --dry-run --skip-pr-check
+          else
+            echo "${IDENTIFIER}: submitting ${version} (${arch_list})"
+            komac update "${IDENTIFIER}" --version "${version}" --urls "${url_args[@]}" --submit --skip-pr-check
+            summary "- **submitted**: \`${version}\` (\`${arch_list}\`)"
+          fi
