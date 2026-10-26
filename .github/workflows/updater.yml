@@ -71,11 +71,6 @@ jobs:
             urls: |
               https://github.com/DonutWare/Fladder/releases/download/v{VERSION}/Fladder-Windows-{VERSION}-Setup.exe|x64
 
-          - identifier: MarcoGomiero.FeedFlow
-            repo: prof18/feed-flow
-            urls: |
-              https://github.com/prof18/feed-flow/releases/download/{VERSION}-all/FeedFlow-{VERSION}.msi|x64
-
           #  x64 + arm64
           - identifier: QGIS.QField
             repo: opengisch/QField
