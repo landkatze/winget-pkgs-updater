@@ -104,6 +104,11 @@ jobs:
               https://github.com/oldj/SwitchHosts/releases/download/v{VERSION}/SwitchHosts-{VERSION}-windows-x86-setup.exe|x86
               https://github.com/oldj/SwitchHosts/releases/download/v{VERSION}/SwitchHosts-{VERSION}-windows-arm64-setup.exe|arm64
 
+          - identifier: MarcoGomiero.FeedFlow
+            repo: prof18/feed-flow
+            urls: |
+              https://github.com/prof18/feed-flow/releases/download/{VERSION}-all/FeedFlow-{VERSION}.msi
+
     steps:
       - name: Install Komac 2.17.1
         env:
