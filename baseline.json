@@ -4,7 +4,7 @@
   "files": {
     ".github/dependabot.yml": "5fb74cf53581e86f7299b02c521d0b57901d1fc4b709886be28d7caf53afc75b",
     ".github/workflows/keepalive.yml": "860ca2674332f7d4a5b57b5c8ef14b49a14a151baf3dea28188f532bf6f220a4",
-    ".github/workflows/updater.yml": "07ab9fdcd9d362dcf186828255353224f70b9b5ad63b0047c439db063d9f8056",
-    "README.md": "fcd79783fea94e20e50f5dc028ab1499522cbf734124d157fb0a7e23b3593caf"
+    ".github/workflows/updater.yml": "37FF9EFC302E4A0CB8165E13C3A7AFCC2589CD4A73CE04EA7027AF927FECF72A",
+    "README.md": "E691DF36C80574D12BD7B26B2E77E0C3847768635BC95BEFF5AFC2BB97E4546B"
   }
 }
