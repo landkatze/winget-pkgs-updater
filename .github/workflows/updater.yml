@@ -71,6 +71,11 @@ jobs:
             urls: |
               https://github.com/DonutWare/Fladder/releases/download/v{VERSION}/Fladder-Windows-{VERSION}-Setup.exe|x64
 
+          - identifier: Cryptomator.Cryptomator
+            repo: cryptomator/cryptomator
+            urls: |
+              https://github.com/cryptomator/cryptomator/releases/download/{VERSION}/Cryptomator-{VERSION}-x64.msi|x64
+
           #  x64 + arm64
           - identifier: QGIS.QField
             repo: opengisch/QField
