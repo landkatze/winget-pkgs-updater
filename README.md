@@ -11,6 +11,7 @@ Scheduled [winget-pkgs](https://github.com/microsoft/winget-pkgs) updater for va
 | `autobrr.mkbrr` | https://github.com/autobrr/mkbrr |
 | `autobrr.upbrr.cli` & `autobrr.upbrr.gui` | https://github.com/autobrr/upbrr |
 | `Blur009.BlurAutoClicker` | https://github.com/Blur009/Blur-AutoClicker |
+| `Cryptomator.Cryptomator` | https://github.com/cryptomator/cryptomator |
 | `DonutWare.Fladder` | https://github.com/DonutWare/Fladder |
 | `MartinDvorak.MindForger` | https://github.com/dvorka/mindforger |
 | `martinrotter.RSSGuard5` | https://github.com/martinrotter/rssguard |
